@@ -1,0 +1,39 @@
+{
+  "name": "gen-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@codesandbox/sandpack-react": "^2.20.0",
+    "@elevenlabs/elevenlabs-js": "^2.38.1",
+    "@langchain/community": "^1.1.22",
+    "@langchain/core": "^1.1.31",
+    "@langchain/google-genai": "^2.1.26",
+    "@langchain/groq": "^1.1.4",
+    "axios": "^1.13.6",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.577.0",
+    "motion": "^12.35.1",
+    "next": "16.1.6",
+    "openai": "^6.27.0",
+    "play-sound": "^1.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-hot-toast": "^2.6.0",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4"
+  }
+}
