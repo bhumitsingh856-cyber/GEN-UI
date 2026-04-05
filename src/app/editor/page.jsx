@@ -31,7 +31,6 @@ function Page() {
           <SandpackPreview
             style={{ height: "100vh" }}
             showRefreshButton={true}
-            showOpenInCodeSandbox={true} // hide their branding btn
             showNavigator={true}
           />
         </SandpackLayout>

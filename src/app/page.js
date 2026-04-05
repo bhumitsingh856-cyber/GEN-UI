@@ -90,7 +90,7 @@ export default function LandingPrompt() {
   return (
     <>
       <AnimatePresence>
-        {/* {!isGenerating && <GeneratingOverlay prompt={submittedPrompt} />} */}
+        {isGenerating && <GeneratingOverlay prompt={submittedPrompt} />}
       </AnimatePresence>
 
       <div className="relative min-h-screen w-full bg-[#050507] text-white flex flex-col items-center overflow-x-hidden">
