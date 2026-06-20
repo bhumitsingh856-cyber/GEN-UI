@@ -51,7 +51,7 @@ GEN UI is an open-source AI frontend builder. You describe what you want — a l
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 15 (App Router) |
-| AI Model | Kimi K2.5 via Fireworks AI |
+| AI Model | Deepseek-v4-flash via Fireworks AI |
 | In-browser Preview | Sandpack (`@codesandbox/sandpack-react`) |
 | Animations | Framer Motion |
 | Styling | Tailwind CSS |
