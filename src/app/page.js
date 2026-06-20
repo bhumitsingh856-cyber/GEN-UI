@@ -306,7 +306,7 @@ export default function LandingPrompt() {
                   transition={{ duration: 1.8, repeat: Infinity }}
                 />
                 <span className="text-[11px] font-medium text-zinc-400">
-                  Kimi K2.5
+                  Deepseek-v4-flash
                 </span>
               </div>
               <span className="text-[11px] text-zinc-400">

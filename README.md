@@ -11,9 +11,6 @@ AI-powered frontend generator that turns a text description into a complete, pro
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react)](https://react.dev)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
-[![Framer Motion](https://img.shields.io/badge/Framer-Motion-ff0055?style=flat-square&logo=framer)](https://www.framer.com/motion)
-
-[Demo](#) · [Report Bug](issues) · [Request Feature](issues)
 
 </div>
 
@@ -37,16 +34,13 @@ GEN UI is an open-source AI frontend builder. You describe what you want — a l
 
 > Write your prompt → watch code stream file by file → preview renders live → deploy instantly
 
-![GEN UI Demo](https://placehold.co/900x500/030305/22d3ee?text=GEN+UI+Demo+GIF)
-
----
 
 ## 🚀 Features
 
-- **AI Code Generation** — Kimi K2.5 via Fireworks AI generates complete React apps at 400 tokens/sec upto 32k tokens.
+- **AI Code Generation** —  Fireworks AI generates complete React apps at 400 tokens/sec upto 32k tokens.
 - **Instant Preview** — Sandpack renders your app in the browser with zero setup
 - **File Explorer** — Full component tree with syntax-highlighted code viewer
-- **One-Click Deploy** — Opens a live shareable URL in CodeSandbox instantly
+- **Live link** — Opens a live shareable URL in CodeSandbox instantly
 - **Export as ZIP** — Download your generated project and run it locally
 - **Split View** — Side-by-side code editor and live preview
 
@@ -66,14 +60,6 @@ GEN UI is an open-source AI frontend builder. You describe what you want — a l
 | Icons | Lucide React |
 
 ---
-
-## 📦 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- A [Fireworks AI](https://fireworks.ai) account and API key
-
 ### Installation
 
 ```bash
@@ -85,16 +71,16 @@ cd gen-ui
 npm install
 
 # Set up environment variables
-cp .env.example .env.local
+cp .env.example 
 ```
 
 ### Environment Variables
 
 ```bash
 # .env.local
-FIREWORKS_API_KEY=fw_your_key_here
+FIREWORKS_API_KEY=your_key_here
+GROQ_API=your_key_here
 ```
-
 ### Run Locally
 
 ```bash
@@ -111,7 +97,7 @@ Open [http://localhost:3000](http://localhost:3000) and start generating.
 1. User types a prompt on the landing page
 
 2. POST /api/genui
-   └── Fireworks AI (Kimi K2.5) returns a JSON object
+   └── Fireworks AI returns a JSON object
        containing all files according to sandbod code format : { "/src/App.js": { code: "..." }, ... }
 
 3. On __success__ signal:
@@ -147,20 +133,6 @@ See [`services/SystemPrompt.js`](services/SystemPrompt.js) for the full prompt.
 
 Contributions are welcome. Here's how:
 
-```bash
-# Fork the repo and create your branch
-git checkout -b feature/your-feature
-
-# Make your changes and commit
-git commit -m "feat: add your feature"
-
-# Push and open a Pull Request
-git push origin feature/your-feature
-```
-
-Please open an issue first for major changes.
-
----
 
 ## 📋 Roadmap
 
@@ -181,13 +153,6 @@ Please open an issue first for major changes.
 - LLM occasionally generates invalid Lucide icon names — sanitized client-side
 
 ---
-
-## 📄 License
-
-MIT © [Your Name](https://github.com/bhumitsingh856-cyber)
-
----
-
 <div align="center">
 
 Built with ☕ and way too many JSON parse errors.
