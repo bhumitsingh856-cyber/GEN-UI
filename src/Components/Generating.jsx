@@ -409,7 +409,7 @@ export const GeneratingOverlay = ({ prompt }) => {
               li++;
             } else {
               clearInterval(streamRef.current);
-              const t = setTimeout(revealNext, 500);
+              const t = setTimeout(revealNext, 1000);
               timeouts.push(t);
             }
           },
@@ -417,13 +417,14 @@ export const GeneratingOverlay = ({ prompt }) => {
         );
       } else {
         // folder — just reveal it and move on
-        const t = setTimeout(revealNext, 350);
+        const t = setTimeout(revealNext, 1000);
         timeouts.push(t);
       }
     }
 
-    const startT = setTimeout(revealNext, 800);
+    const startT = setTimeout(revealNext, 1000);
     timeouts.push(startT);
+
 
     return function () {
       cancelled = true;

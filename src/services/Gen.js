@@ -9,37 +9,19 @@ const client = new OpenAI({
 });
 
 export default async function Gen(prompt) {
-  console.log("Generation started...\n");
   try {
     const stream = await client.chat.completions.create({
       max_completion_tokens: 32768,
       temperature: 1,
-      model: "accounts/fireworks/models/kimi-k2p5",
+      model: "accounts/fireworks/models/deepseek-v4-flash",
       messages: [
         { role: "system", content: SystemPrompt },
         { role: "user", content: prompt },
       ],
-      stream: true, // 1. Enable streaming
     });
-
-    let fullContent = "";
-
-    // 2. Iterate over the stream chunks
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || "";
-      fullContent += content;
-      
-      // 3. Write to console without a newline to simulate real-time typing
-      process.stdout.write(content); 
-    }
-
-    console.log("\n\n--- Generation Finished ---");
-    
-    // 4. Parse the full accumulated string at the end
-    return await parser.parse(fullContent);
-    
+    return await parser.parse(stream.choices[0].message.content);
   } catch (e) {
-    console.error("\nError during streaming:", e);
+    console.error("Error during streaming:", e);
     return null;
   }
-} 
+}    
