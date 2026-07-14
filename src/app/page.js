@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useEffectEvent } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useCodeStore } from "@/store/zustand";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { GeneratingOverlay } from "@/Components/Generating";
+import GeneratingOverlay from "@/Components/Generating";
 import Logo from "@/Components/Logo";
 import toast from "react-hot-toast";
+import { 
+  Sparkles, 
+  ArrowUp, 
+  Github, 
+  Code2,
+  Zap,
+  Send,
+  Loader2
+} from "lucide-react";
+
+// ── Constants ─────────────────────────────────────────────────────────────────
+
 const SUGGESTIONS = [
   "Landing page for an AI startup",
   "Modern SaaS dashboard UI",
@@ -20,15 +32,162 @@ const SUGGESTIONS = [
 
 const CAPS = ["React + Tailwind", "Responsive", "Production ready", "Instant"];
 
-// ── Main ──
+const TOAST_STYLES = {
+  background: "#050507",
+  color: "#fff",
+  border: "1px solid #06b6d4",
+};
+
+const ERROR_TOAST_STYLES = {
+  background: "#050507",
+  color: "#fff",
+  border: "1px solid #ef4444",
+};
+
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+const BackgroundEffects = React.memo(() => (
+  <>
+    <div
+      className="pointer-events-none absolute inset-0 z-0"
+      style={{
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
+        backgroundSize: "44px 44px",
+        maskImage:
+          "radial-gradient(ellipse 75% 55% at 50% 0%, black, transparent)",
+      }}
+    />
+    <div
+      className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[640px] h-[340px] z-0"
+      style={{
+        background:
+          "radial-gradient(ellipse at center, rgba(6,182,212,0.13) 0%, rgba(124,58,237,0.07) 50%, transparent 75%)",
+        filter: "blur(40px)",
+      }}
+    />
+  </>
+));
+
+const NavBar = React.memo(() => (
+  <motion.nav
+    initial={{ opacity: 0, y: -8 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, ease: "easeOut" }}
+    className="w-full max-w-5xl flex items-center justify-between px-6 pt-6 z-10"
+  >
+    <Logo />
+    <div className="flex items-center gap-6">
+      <Link
+        href="/editor"
+        className="text-[13px] flex text-white decoration-zinc-300 underline underline-offset-4 hover:text-white/55 transition-colors duration-150 group"
+      >
+        <span className="group-hover:text-cyan-400 transition-colors">Code</span>
+        <span className="text-cyan-400">Editor</span>
+      </Link>
+      <Link
+        href="https://github.com/bhumitsingh856-cyber/GEN-UI"
+        target="_blank"
+        className="text-[13px] text-white flex underline decoration-zinc-300 underline-offset-4 hover:text-white/55 transition-colors duration-150 group"
+      >
+        <Github className="w-4 h-4 mr-1 group-hover:text-cyan-400 transition-colors" />
+        <span className="group-hover:text-cyan-400 transition-colors">Git</span>
+        <span className="text-cyan-400">Hub</span>
+      </Link>
+    </div>
+  </motion.nav>
+));
+
+const HeroSection = React.memo(() => (
+  <motion.div
+    initial={{ opacity: 0, y: 28 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.75, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+    className="text-center mt-[clamp(3.5rem,10vw,6rem)] mb-10 max-w-2xl px-4 z-10"
+  >
+    <div
+      className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
+      style={{
+        background: "rgba(6,182,212,0.07)",
+        border: "1px solid rgba(6,182,212,0.15)",
+      }}
+    >
+      <motion.span
+        className="w-1.5 h-1.5 rounded-full bg-cyan-400"
+        animate={{ opacity: [1, 0.4, 1] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+      <span className="text-[11px] text-cyan-400 font-medium tracking-widest uppercase">
+        AI Frontend Builder
+      </span>
+    </div>
+
+    <h1
+      className="font-semibold leading-[1.07] mb-5"
+      style={{
+        fontSize: "clamp(2.4rem, 5.5vw, 3.6rem)",
+        letterSpacing: "-0.035em",
+      }}
+    >
+      Generate frontend UI
+      <br />
+      <span
+        style={{
+          background: "linear-gradient(95deg, #22d3ee 20%, #a78bfa 80%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
+        with AI
+      </span>
+    </h1>
+
+    <p
+      className="text-white/30 leading-relaxed font-light"
+      style={{ fontSize: "0.9375rem" }}
+    >
+      Describe a website or component — GENUI writes the code.
+    </p>
+  </motion.div>
+));
+
+const SuggestionButton = React.memo(({ suggestion, onClick }) => (
+  <motion.button
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    onClick={onClick}
+    className="px-3.5 py-[7px] rounded-full text-[12px] font-light transition-all duration-150 hover:scale-105"
+    style={{
+      color: "rgba(255,255,255,0.32)",
+      background: "rgba(255,255,255,0.025)",
+      border: "1px solid rgba(255,255,255,0.07)",
+      letterSpacing: "0.01em",
+    }}
+    whileHover={{
+      color: "rgba(255,255,255,0.65)",
+      borderColor: "rgba(6,182,212,0.28)",
+      background: "rgba(6,182,212,0.05)",
+    }}
+  >
+    {suggestion}
+  </motion.button>
+));
+
+// ── Main Component ────────────────────────────────────────────────────────────
+
 export default function LandingPrompt() {
   const [prompt, setPrompt] = useState("");
   const [focused, setFocused] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [submittedPrompt, setSubmittedPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
   const textareaRef = useRef(null);
   const { setFiles } = useCodeStore();
   const router = useRouter();
+
+  // ── Auto-resize textarea ──────────────────────────────────────────────────
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -36,56 +195,92 @@ export default function LandingPrompt() {
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
   }, [prompt]);
+
+  // ── Welcome toast ────────────────────────────────────────────────────────
+
   useEffect(() => {
     toast.success("Welcome to GEN UI", {
       icon: "✨",
-      style: {
-        backgroundColor: "#050507",
-        color: "#fff",
-        border: "1px solid #06b6d4",
-      },
+      style: TOAST_STYLES,
       duration: 3000,
     });
   }, []);
 
-  const handleSubmit = async (e) => {
+  // ── Handlers ─────────────────────────────────────────────────────────────
+
+  const handleSubmit = useCallback(async (e) => {
     e?.preventDefault();
-    if (!prompt.trim() || isGenerating) return;
+    
+    if (!prompt.trim() || isGenerating || isLoading) return;
+    
     setSubmittedPrompt(prompt);
     setIsGenerating(true);
+    setIsLoading(true);
+
     try {
-      console.log("Data sent");
       const res = await axios.post("/api/genui", { prompt });
-      console.log("Data recieved", res);
+      
       if (res.data.success) {
-        console.log("data", res.data);
         setFiles(res.data.res);
-        router.push("/editor");
-      } else {
-        toast.error("Failed to generate code , Try again", {
-          icon: "❌",
-          style: {
-            backgroundColor: "#050507",
-            color: "#fff",
-            border: "1px solid red",
-          },
+        toast.success("UI Generated Successfully! 🎉", {
+          icon: "🚀",
+          style: TOAST_STYLES,
           duration: 3000,
         });
+        router.push("/editor");
+      } else {
+        throw new Error(res.data.message || "Generation failed");
       }
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error("Generation error:", error);
       setIsGenerating(false);
-      toast.error("Something went wrong , Try again", {
+      toast.error(error.response?.data?.message || "Something went wrong. Try again.", {
         icon: "❌",
-        style: {
-          backgroundColor: "#050507",
-          color: "#fff",
-          border: "1px solid red",
-        },
-        duration: 3000,
+        style: ERROR_TOAST_STYLES,
+        duration: 4000,
       });
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [prompt, isGenerating, isLoading, setFiles, router]);
+
+  const handleSuggestionClick = useCallback((suggestion) => {
+    setPrompt(suggestion);
+    textareaRef.current?.focus();
+  }, []);
+
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  }, [handleSubmit]);
+
+  // ── Memoized values ─────────────────────────────────────────────────────
+
+  const isButtonDisabled = useMemo(
+    () => !prompt.trim() || isGenerating || isLoading,
+    [prompt, isGenerating, isLoading]
+  );
+
+  const buttonStyles = useMemo(() => {
+    if (isButtonDisabled) {
+      return {
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        color: "rgba(255,255,255,0.18)",
+        cursor: "not-allowed",
+      };
+    }
+    return {
+      background: "linear-gradient(135deg, rgba(6,182,212,0.2), rgba(124,58,237,0.15))",
+      border: "1px solid rgba(6,182,212,0.38)",
+      boxShadow: "0 0 16px rgba(6,182,212,0.12)",
+      color: "#22d3ee",
+    };
+  }, [isButtonDisabled]);
+
+  // ── Render ──────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -94,7 +289,7 @@ export default function LandingPrompt() {
       </AnimatePresence>
 
       <div className="relative min-h-screen w-full bg-[#050507] text-white flex flex-col items-center overflow-x-hidden">
-        <style>{`
+        <style jsx>{`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
           * { font-family: 'Inter', sans-serif; }
           textarea { outline: none !important; resize: none; }
@@ -102,100 +297,11 @@ export default function LandingPrompt() {
           ::selection { background: rgba(6,182,212,0.2); }
         `}</style>
 
-        <div
-          className="pointer-events-none absolute inset-0 z-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(ellipse 75% 55% at 50% 0%, black, transparent)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[640px] h-[340px] z-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(6,182,212,0.13) 0%, rgba(124,58,237,0.07) 50%, transparent 75%)",
-            filter: "blur(40px)",
-          }}
-        />
-        <motion.nav
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-5xl flex items-center justify-between px-6 pt-6 z-10"
-        >
-          <Logo></Logo>
-          <div className="flex items-center gap-6">
-            <Link
-              href="/editor"
-              className="text-[13px] flex text-white decoration-zinc-300 underline underline-offset-4 hover:text-white/55 transition-colors duration-150"
-            >
-              Code <h1 className="text-cyan-400">Editor</h1>
-            </Link>
-            <Link
-              href="https://github.com/bhumitsingh856-cyber/GEN-UI"
-              target="_blank"
-              className="text-[13px] text-white flex underline decoration-zinc-300 underline-offset-4 hover:text-white/55 transition-colors duration-150"
-            >
-              Git <h1 className="text-cyan-400">Hub</h1>
-            </Link>
-          </div>
-        </motion.nav>
+        <BackgroundEffects />
+        <NavBar />
+        <HeroSection />
 
-        <motion.div
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mt-[clamp(3.5rem,10vw,6rem)] mb-10 max-w-2xl px-4 z-10"
-        >
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
-            style={{
-              background: "rgba(6,182,212,0.07)",
-              border: "1px solid rgba(6,182,212,0.15)",
-            }}
-          >
-            <motion.span
-              className="w-1.5 h-1.5 rounded-full bg-cyan-400"
-              animate={{ opacity: [1, 0.4, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-            <span className="text-[11px] text-cyan-400 font-medium tracking-widest uppercase">
-              AI Frontend Builder
-            </span>
-          </div>
-
-          <h1
-            className="font-semibold leading-[1.07] mb-5"
-            style={{
-              fontSize: "clamp(2.4rem, 5.5vw, 3.6rem)",
-              letterSpacing: "-0.035em",
-            }}
-          >
-            Generate frontend UI
-            <br />
-            <span
-              style={{
-                background: "linear-gradient(95deg, #22d3ee 20%, #a78bfa 80%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              with AI
-            </span>
-          </h1>
-
-          <p
-            className="text-white/30 leading-relaxed font-light"
-            style={{ fontSize: "0.9375rem" }}
-          >
-            Describe a website or component — GENUI writes the code.
-          </p>
-        </motion.div>
-
+        {/* ── Input Section ── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -215,6 +321,7 @@ export default function LandingPrompt() {
               backdropFilter: "blur(20px)",
             }}
           >
+            {/* Focus indicator line */}
             <div
               className="relative h-[1px]"
               style={{ background: "rgba(255,255,255,0.06)" }}
@@ -236,6 +343,7 @@ export default function LandingPrompt() {
               </AnimatePresence>
             </div>
 
+            {/* Textarea */}
             <div className="flex items-end gap-2 px-4 pt-[14px] pb-3">
               <textarea
                 ref={textareaRef}
@@ -243,12 +351,7 @@ export default function LandingPrompt() {
                 onChange={(e) => setPrompt(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
+                onKeyDown={handleKeyDown}
                 placeholder="Create a modern SaaS landing page with hero, features and CTA..."
                 className="flex-1 bg-transparent text-white/85 leading-[1.65] px-1"
                 style={{
@@ -256,47 +359,27 @@ export default function LandingPrompt() {
                   minHeight: "54px",
                   maxHeight: "200px",
                 }}
+                disabled={isGenerating || isLoading}
               />
+              
+              {/* Submit Button */}
               <motion.button
                 onClick={handleSubmit}
-                disabled={!prompt.trim() || isGenerating}
-                whileHover={
-                  prompt.trim() && !isGenerating ? { scale: 1.07 } : {}
-                }
-                whileTap={prompt.trim() && !isGenerating ? { scale: 0.92 } : {}}
-                className="flex-shrink-0 mb-[2px] w-[38px] h-[38px] rounded-xl flex items-center justify-center transition-all duration-200"
-                style={
-                  prompt.trim() && !isGenerating
-                    ? {
-                        background:
-                          "linear-gradient(135deg, rgba(6,182,212,0.2), rgba(124,58,237,0.15))",
-                        border: "1px solid rgba(6,182,212,0.38)",
-                        boxShadow: "0 0 16px rgba(6,182,212,0.12)",
-                        color: "#22d3ee",
-                      }
-                    : {
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.07)",
-                        color: "rgba(255,255,255,0.18)",
-                      }
-                }
+                disabled={isButtonDisabled}
+                whileHover={!isButtonDisabled ? { scale: 1.07 } : {}}
+                whileTap={!isButtonDisabled ? { scale: 0.92 } : {}}
+                className="flex-shrink-0 mb-[2px] w-[38px] h-[38px] rounded-xl flex items-center justify-center transition-all duration-200 relative"
+                style={buttonStyles}
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="12" y1="19" x2="12" y2="5" />
-                  <polyline points="5 12 12 5 19 12" />
-                </svg>
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </motion.button>
             </div>
 
+            {/* Footer */}
             <div className="flex items-center justify-between px-5 pb-[13px]">
               <div className="flex items-center gap-1.5">
                 <motion.span
@@ -316,6 +399,7 @@ export default function LandingPrompt() {
           </motion.div>
         </motion.div>
 
+        {/* ── Suggestions ── */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -323,38 +407,15 @@ export default function LandingPrompt() {
           className="flex flex-wrap justify-center gap-2 mt-5 max-w-[640px] px-4 z-10"
         >
           {SUGGESTIONS.map((s, i) => (
-            <motion.button
+            <SuggestionButton
               key={s}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.38 + i * 0.045 }}
-              onClick={() => {
-                setPrompt(s);
-                textareaRef.current?.focus();
-              }}
-              className="px-3.5 py-[7px] rounded-full text-[12px] font-light transition-all duration-150"
-              style={{
-                color: "rgba(255,255,255,0.32)",
-                background: "rgba(255,255,255,0.025)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                letterSpacing: "0.01em",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = "rgba(255,255,255,0.65)";
-                e.currentTarget.style.borderColor = "rgba(6,182,212,0.28)";
-                e.currentTarget.style.background = "rgba(6,182,212,0.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = "rgba(255,255,255,0.32)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)";
-                e.currentTarget.style.background = "rgba(255,255,255,0.025)";
-              }}
-            >
-              {s}
-            </motion.button>
+              suggestion={s}
+              onClick={() => handleSuggestionClick(s)}
+            />
           ))}
         </motion.div>
 
+        {/* ── Features Capsules ── */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -376,6 +437,7 @@ export default function LandingPrompt() {
           ))}
         </motion.div>
 
+        {/* ── Footer ── */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

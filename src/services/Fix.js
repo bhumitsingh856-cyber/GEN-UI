@@ -1,4 +1,4 @@
-import FixerLLM from "./LLM.js";
+import { FixerLLM } from "./LLM.js";
 import { FixSystemPrompt } from "./FixSystemPrompt.js";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 export async function Fix(component) {
