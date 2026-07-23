@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { Link } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
 function LiveLink() {
   const { files } = useCodeStore();
   const [loading, setLoading] = useState(false);
@@ -21,8 +20,9 @@ function LiveLink() {
       const { data } = await axios.post(
         "https://codesandbox.io/api/v1/sandboxes/define?json=1",
         { files: formatedFile },
-      ); 
-      window.open(`https://${data.sandbox_id}.csb.app`, '_blank');
+      );
+      const url = `https://${data.sandbox_id}.csb.app`;
+      router.push(url);
     } catch (e) {
       toast.error("Failed to create live link");
     } finally {
@@ -43,7 +43,7 @@ function LiveLink() {
       ) : (
         <span className="flex items-center gap-1">
           <Link className="w-3 h-3" />
-          Live Link   
+          Live Link
         </span>
       )}
     </button>
