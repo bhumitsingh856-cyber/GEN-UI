@@ -1,19 +1,22 @@
 import { useSandpack } from "@codesandbox/sandpack-react";
 import { useCodeStore } from "@/store/zustand";
-import { useEffect, useRef } from "react";
-function SyncCodes() {
-  const { sandpack } = useSandpack();
+import toast from "react-hot-toast";
+
+export default function SyncButton() {
+  const { sandpack } = useSandpack(); // ✅ Hook at top level
   const { setFiles } = useCodeStore();
-  const ref = useRef(sandpack.files);
-  console.log(sandpack.files);
-  useEffect(() => {
-    if (ref.current !== sandpack.files) {
-      ref.current = sandpack.files;
-      setFiles(sandpack.files);
-    }
-  }, [sandpack.files]);
 
-  return null;
+  const handleSync = () => {
+    setFiles(sandpack.files);
+    toast.success("Saved Changes");
+  };
+
+  return (
+    <button
+      onClick={handleSync}
+      className="px-3 py-1 text-xs bg-white/10 rounded hover:bg-white/20"
+    >
+      Save Changes
+    </button>
+  );
 }
-
-export default SyncCodes;

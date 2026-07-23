@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "GEN UI",
+  title: "Gen UI",
   description: "AI Frontend Builder",
   icons : {
     icon : "/gen.png"

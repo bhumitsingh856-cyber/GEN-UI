@@ -4,6 +4,13 @@
   --background: #ffffff;
   --foreground: #171717;
 }
+button{
+  cursor: pointer;
+}
+button:hover{
+  transform: scale(1.05);
+  
+}
 
 @theme inline {
   --color-background: var(--background);

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Link } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
 function LiveLink() {
   const { files } = useCodeStore();
   const [loading, setLoading] = useState(false);
@@ -20,8 +21,8 @@ function LiveLink() {
       const { data } = await axios.post(
         "https://codesandbox.io/api/v1/sandboxes/define?json=1",
         { files: formatedFile },
-      );
-      router.push(`https://${data.sandbox_id}.csb.app`);
+      ); 
+      window.open(`https://${data.sandbox_id}.csb.app`, '_blank');
     } catch (e) {
       toast.error("Failed to create live link");
     } finally {
@@ -31,11 +32,20 @@ function LiveLink() {
   return (
     <button
       onClick={handleLiveLink}
-      className="md:px-4 px-2 py-1 gap-1  items-center flex text-3xs md:text-xs bg-linear-to-r border-2 hover:scale-105 duration-300 border-white/20 from-stone-600 to-zinc-800 font-bold rounded-full text-white "
+      disabled={loading}
+      className="px-3 py-1 text-xs rounded-full bg-white/10 text-white/80 hover:bg-white/20 border border-white/20 transition disabled:opacity-40"
     >
-      <Link className="scale-75" />
-      Live Link
-      {loading && <div className="w-3.5 h-3.5 rounded-full border-8 border-white/20 border-t-white animate-spin" />}
+      {loading ? (
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-full border-2 border-white/30 border-t-white animate-spin inline-block" />
+          Loading...
+        </span>
+      ) : (
+        <span className="flex items-center gap-1">
+          <Link className="w-3 h-3" />
+          Live Link   
+        </span>
+      )}
     </button>
   );
 }

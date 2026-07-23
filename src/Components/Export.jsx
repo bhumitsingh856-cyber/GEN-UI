@@ -23,11 +23,13 @@ function Export() {
 
   return (
     <button
-      onClick={() => handleExport()}
-      className="md:px-4 py-1 px-2  bg-linear-to-r from-stone-600 hover:scale-105 border-2 border-white/50 to-zinc-800 hover:from-stone-800 hover:to-zinc-600  duration-300 font-bold rounded-full text-white shadow-lg flex items-center gap-1"
+      onClick={handleExport}
+      className="px-3 py-1 text-xs rounded-full bg-white/10 text-white/80 hover:bg-white/20 border border-white/20 transition"
     >
-      <CloudDownload className="scale-75" />
-      Export
+      <span className="flex items-center gap-1">
+        <CloudDownload className="w-3 h-3" />
+        Export
+      </span>
     </button>
   );
 }

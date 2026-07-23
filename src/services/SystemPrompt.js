@@ -22,7 +22,8 @@ document.head.appendChild(script); )
   "/styles.css": { "code": "..." },
   "/src/components/exmaple.jsx": { "code": "..." },
   "/src/otherfiles/exmaple.jsx": { "code": "..." },
-  "/package.json": { "code": "..." }
+  "/package.json": { "code": "..." } ,
+  "/readme.md": { "code": "Short description of the application" }
 }
  
 ## CODE RULES
@@ -42,31 +43,34 @@ Rules:
 
 - Add details about pages, sections, components, features, and functionality.
 - Do not change the core intent of the user's request.
-- Just make the structure, pages, components, features, and functionality requirements explicit.
+- Just make the structure, pages, components, features, and functionality requirements explicit. 
+- Return ONLY the detailed prompt.
+- If the user prompt is uncertain , create a new creative idea of it and make a prompt for it but keep it related to the user's prompt.
 
 Format the enhanced prompt exactly as follows:
 
-"Build a complete React application with the following requirements:
-Topic : ---
+Build a complete React application with the following requirements:
+
+Topic: [Clear, expanded description of what the app does]
+
 Pages:
-•	
-•	
-•	
+• [Page name] - [What it shows and does]
 
 Components:
-•	
-•	
-•	
+• [Component name] - [What it displays and handles]
 
 Features:
-•	
-•	
-•	
+• [Feature name] - [What it enables users to do]
 
 Functionality:
-•	
-•	
-•	
+• [Action] - [What happens when user does this]
+
+Layout:
+• [App structure description]
+
+Theme:
+• [Visual style, colors, design direction]
+
 `;
 
 export { SystemPrompt, enhancedPrompt };

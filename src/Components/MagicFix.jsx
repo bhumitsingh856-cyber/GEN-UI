@@ -4,15 +4,15 @@ import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 export const AIFixButton = () => {
-    const { files, updateCode } = useCodeStore();
- 
+  const { files, updateCode } = useCodeStore();
+
   const { sandpack } = useSandpack();
   const { error, updateFile } = sandpack;
   const [fixing, setFixing] = useState(false);
 
   const handleFix = async () => {
     if (!error) {
-      toast.success("No errors detected! Your code is looking good.", {
+      toast.success("No error detected !", {
         duration: 3000,
       });
       return;
@@ -39,7 +39,9 @@ export const AIFixButton = () => {
         updateCode(filePath, { code: res.data.code });
       }
     } catch (e) {
-      console.error("Fix failed:", e);
+      toast.error("Fix failed, Try again", {
+        duration: 3000,
+      });
     } finally {
       setFixing(false);
     }
@@ -49,15 +51,23 @@ export const AIFixButton = () => {
     <button
       onClick={handleFix}
       disabled={fixing}
-      className="md:px-4 px-2  bg-linear-to-r from-blue-800 hover:scale-105 border-2 border-white/50 to-green-600 hover:from-sky-800 hover:to-yellow-600  duration-300 font-bold rounded-full text-white shadow-lg flex items-center gap-2"
+      className="px-3 py-1 text-xs rounded-full 
+    bg-amber-500/20 text-amber-400 
+    hover:bg-amber-500/30 
+    border border-amber-500/30 hover:border-amber-500/50
+    transition-all duration-200
+    disabled:opacity-40 disabled:cursor-not-allowed"
     >
       {fixing ? (
-        <>
-          <div className="w-3.5 h-3.5 rounded-full border-8 border-white/20 border-t-white animate-spin" />
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-full border-2 border-amber-400/30 border-t-amber-400 animate-spin inline-block" />
           Fixing...
-        </>
+        </span>
       ) : (
-        "Magic Fix ✨"
+        <span className="flex items-center gap-1">
+          <span className="text-sm">✨</span>
+          Magic Fix
+        </span>
       )}
     </button>
   );
