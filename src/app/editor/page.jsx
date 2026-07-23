@@ -19,7 +19,7 @@ function Page() {
   const { files, updateCode, setFiles } = useCodeStore();
   const [isChatOpen, setIsChatOpen] = useState(false);
   return (
-    <div className="relative">
+    <div>
       <SandpackProvider theme="dark" template="react" files={files}>
         <Navbar
           onChatToggle={() => setIsChatOpen(!isChatOpen)}
