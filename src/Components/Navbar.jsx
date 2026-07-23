@@ -3,12 +3,13 @@ import { AIFixButton } from "./MagicFix";
 import LiveLink from "./LiveLink";
 import Logo from "./Logo";
 import { MessageSquare } from "lucide-react";
-
+import SyncButton from "./SyncCodes";
 function Navbar({ onChatToggle, chatOpen }) {
   return (
     <nav className="flex gap-1 items-center justify-between bg-black rounded-l-full overflow-hidden p-1">
       <Logo />
       <div className="flex gap-1 items-center">
+        <SyncButton />
         <LiveLink />
         <Export />
         <AIFixButton />

@@ -14,7 +14,7 @@ export default function SyncButton() {
   return (
     <button
       onClick={handleSync}
-      className="px-3 py-1 text-xs bg-white/10 rounded hover:bg-white/20"
+      className="px-3 py-1 text-xs rounded-full bg-white/10 text-white/80 hover:bg-white/20 border border-white/20 transition disabled:opacity-40"
     >
       Save Changes
     </button>
