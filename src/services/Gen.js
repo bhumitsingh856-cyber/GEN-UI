@@ -5,14 +5,17 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 const parser = new JsonOutputParser();
 
 export default async function Gen(prompt) {
+  let ui = {};
   try {
+    console.log(prompt);
     const res = await CodeGenerationLLM.invoke([
       new SystemMessage(SystemPrompt),
       new HumanMessage(prompt),
     ]);
-    return await parser.parse(res.content);
+    ui = res.content;
+    return await parser.parse(ui);
   } catch (e) {
-    console.error("Error during streaming:", e);
-    return null;
+    console.log("error in gen", e);
+    return ui;
   }
 }

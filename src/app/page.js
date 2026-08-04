@@ -1,26 +1,24 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useCodeStore } from "@/store/zustand";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { saveProject } from "@/actions/saveProject";
 import GeneratingOverlay from "@/Components/Generating";
-import Logo from "@/Components/Logo";
+import { NavBar } from "@/Components/HomeNav";
 import toast from "react-hot-toast";
-import { 
-  Sparkles, 
-  ArrowUp, 
-  Github, 
-  Code2,
-  Zap,
-  Send,
-  Loader2
-} from "lucide-react";
-
-// ── Constants ─────────────────────────────────────────────────────────────────
-
+import { Send, Loader2 } from "lucide-react";
+import { HeroSection } from "@/Components/HeroSection";
+import FeaturesCapsules from "@/Components/FeaturesCapsules";
+import { useUser } from "@clerk/nextjs";
 const SUGGESTIONS = [
   "Landing page for an AI startup",
   "Modern SaaS dashboard UI",
@@ -29,8 +27,6 @@ const SUGGESTIONS = [
   "Crypto analytics dashboard",
   "Blog homepage with sidebar",
 ];
-
-const CAPS = ["React + Tailwind", "Responsive", "Production ready", "Instant"];
 
 const TOAST_STYLES = {
   background: "#050507",
@@ -69,89 +65,6 @@ const BackgroundEffects = React.memo(() => (
   </>
 ));
 
-const NavBar = React.memo(() => (
-  <motion.nav
-    initial={{ opacity: 0, y: -8 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, ease: "easeOut" }}
-    className="w-full max-w-5xl flex items-center justify-between px-6 pt-6 z-10"
-  >
-    <Logo />
-    <div className="flex items-center gap-6">
-      <Link
-        href="/editor"
-        className="text-[13px] flex text-white decoration-zinc-300 underline underline-offset-4 hover:text-white/55 transition-colors duration-150 group"
-      >
-        <span className="group-hover:text-cyan-400 transition-colors">Code</span>
-        <span className="text-cyan-400">Editor</span>
-      </Link>
-      <Link
-        href="https://github.com/bhumitsingh856-cyber/GEN-UI"
-        target="_blank"
-        className="text-[13px] text-white flex underline decoration-zinc-300 underline-offset-4 hover:text-white/55 transition-colors duration-150 group"
-      >
-        <Github className="w-4 h-4 mr-1 group-hover:text-cyan-400 transition-colors" />
-        <span className="group-hover:text-cyan-400 transition-colors">Git</span>
-        <span className="text-cyan-400">Hub</span>
-      </Link>
-    </div>
-  </motion.nav>
-));
-
-const HeroSection = React.memo(() => (
-  <motion.div
-    initial={{ opacity: 0, y: 28 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.75, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
-    className="text-center mt-[clamp(3.5rem,10vw,6rem)] mb-10 max-w-2xl px-4 z-10"
-  >
-    <div
-      className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-6"
-      style={{
-        background: "rgba(6,182,212,0.07)",
-        border: "1px solid rgba(6,182,212,0.15)",
-      }}
-    >
-      <motion.span
-        className="w-1.5 h-1.5 rounded-full bg-cyan-400"
-        animate={{ opacity: [1, 0.4, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-      <span className="text-[11px] text-cyan-400 font-medium tracking-widest uppercase">
-        AI Frontend Builder
-      </span>
-    </div>
-
-    <h1
-      className="font-semibold leading-[1.07] mb-5"
-      style={{
-        fontSize: "clamp(2.4rem, 5.5vw, 3.6rem)",
-        letterSpacing: "-0.035em",
-      }}
-    >
-      Generate frontend UI
-      <br />
-      <span
-        style={{
-          background: "linear-gradient(95deg, #22d3ee 20%, #a78bfa 80%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
-      >
-        with AI
-      </span>
-    </h1>
-
-    <p
-      className="text-white/30 leading-relaxed font-light"
-      style={{ fontSize: "0.9375rem" }}
-    >
-      Describe a website or component — GENUI writes the code.
-    </p>
-  </motion.div>
-));
-
 const SuggestionButton = React.memo(({ suggestion, onClick }) => (
   <motion.button
     initial={{ opacity: 0 }}
@@ -182,13 +95,34 @@ export default function LandingPrompt() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [submittedPrompt, setSubmittedPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+  const { setFiles, setCurrentProjectID } = useCodeStore();
+  const { user } = useUser();
+  const [limit, setLimit] = useState(null);
   const textareaRef = useRef(null);
-  const { setFiles } = useCodeStore();
   const router = useRouter();
 
   // ── Auto-resize textarea ──────────────────────────────────────────────────
-
+  useEffect(() => {
+    if (!user) {
+      const savedLimit = localStorage.getItem("genui_limit");
+      if (!savedLimit) {
+        localStorage.setItem("genui_limit", "3");
+        setLimit(3);
+      } else if (parseInt(savedLimit, 10) <= 0) {
+        setLimit(0);
+        toast.error(
+          "You have reached your free limit of 3 generations. Please Sign up to get more.",
+          {
+            icon: "⚠️",
+            style: ERROR_TOAST_STYLES,
+            duration: 4000,
+          },
+        );
+      } else {
+        setLimit(parseInt(savedLimit, 10));
+      }
+    }
+  }, []);
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -208,59 +142,78 @@ export default function LandingPrompt() {
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
-  const handleSubmit = useCallback(async (e) => {
-    e?.preventDefault();
-    
-    if (!prompt.trim() || isGenerating || isLoading) return;
-    
-    setSubmittedPrompt(prompt);
-    setIsGenerating(true);
-    setIsLoading(true);
+  const handleSubmit = useCallback(
+    async (e) => {
+      e?.preventDefault();
 
-    try {
-      const res = await axios.post("/api/genui", { prompt });
-      
-      if (res.data.success) {
-        setFiles(res.data.res);
-        toast.success("UI Generated Successfully! 🎉", {
-          icon: "🚀",
-          style: TOAST_STYLES,
-          duration: 3000,
-        });
-        router.push("/editor");
-      } else {
-        throw new Error(res.data.message || "Generation failed");
+      if (!prompt.trim() || isGenerating || isLoading) return;
+
+      setSubmittedPrompt(prompt);
+      setIsGenerating(true);
+      setIsLoading(true);
+
+      try {
+        const res = await axios.post("/api/genui", { prompt });
+
+        if (res.data.success) {
+          setFiles(res.data.res);
+          toast.success("UI Generated Successfully! 🎉", {
+            icon: "🚀",
+            style: TOAST_STYLES,
+            duration: 3000,
+          });
+
+          const saved = await saveProject({ files: res.data.res, prompt });
+          if (saved?.success && saved.project?._id) {
+            setCurrentProjectID(saved.project._id);
+          }
+          // Check for non users limit
+          if (!user && limit && limit > 0) {
+            const newLimit = limit - 1;
+            setLimit(newLimit);
+            localStorage.setItem("genui_limit", newLimit.toString());
+          }
+          router.push("/editor");
+        } else {
+          throw new Error(res.data.message || "Generation failed");
+        }
+      } catch (error) {
+        setIsGenerating(false);
+        toast.error(
+          error.response?.data?.message || "Something went wrong. Try again.",
+          {
+            icon: "❌",
+            style: ERROR_TOAST_STYLES,
+            duration: 4000,
+          },
+        );
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Generation error:", error);
-      setIsGenerating(false);
-      toast.error(error.response?.data?.message || "Something went wrong. Try again.", {
-        icon: "❌",
-        style: ERROR_TOAST_STYLES,
-        duration: 4000,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [prompt, isGenerating, isLoading, setFiles, router]);
+    },
+    [prompt, isGenerating, isLoading, setFiles, router],
+  );
 
   const handleSuggestionClick = useCallback((suggestion) => {
     setPrompt(suggestion);
     textareaRef.current?.focus();
   }, []);
 
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  }, [handleSubmit]);
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSubmit(e);
+      }
+    },
+    [handleSubmit],
+  );
 
   // ── Memoized values ─────────────────────────────────────────────────────
 
   const isButtonDisabled = useMemo(
-    () => !prompt.trim() || isGenerating || isLoading,
-    [prompt, isGenerating, isLoading]
+    () => !prompt.trim() || isGenerating || isLoading || limit == 0,
+    [prompt, isGenerating, isLoading, limit],
   );
 
   const buttonStyles = useMemo(() => {
@@ -273,7 +226,8 @@ export default function LandingPrompt() {
       };
     }
     return {
-      background: "linear-gradient(135deg, rgba(6,182,212,0.2), rgba(124,58,237,0.15))",
+      background:
+        "linear-gradient(135deg, rgba(6,182,212,0.2), rgba(124,58,237,0.15))",
       border: "1px solid rgba(6,182,212,0.38)",
       boxShadow: "0 0 16px rgba(6,182,212,0.12)",
       color: "#22d3ee",
@@ -290,15 +244,27 @@ export default function LandingPrompt() {
 
       <div className="relative min-h-screen w-full bg-[#050507] text-white flex flex-col items-center overflow-x-hidden">
         <style jsx>{`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-          * { font-family: 'Inter', sans-serif; }
-          textarea { outline: none !important; resize: none; }
-          textarea::placeholder { color: rgba(80,80,100,0.9); font-size: 0.9rem; }
-          ::selection { background: rgba(6,182,212,0.2); }
+          @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap");
+          * {
+            font-family: "Inter", sans-serif;
+          }
+          textarea {
+            outline: none !important;
+            resize: none;
+          }
+          textarea::placeholder {
+            color: rgba(80, 80, 100, 0.9);
+            font-size: 0.9rem;
+          }
+          ::selection {
+            background: rgba(6, 182, 212, 0.2);
+          }
         `}</style>
 
         <BackgroundEffects />
-        <NavBar />
+
+        <NavBar limit={limit} />
+
         <HeroSection />
 
         {/* ── Input Section ── */}
@@ -361,7 +327,7 @@ export default function LandingPrompt() {
                 }}
                 disabled={isGenerating || isLoading}
               />
-              
+
               {/* Submit Button */}
               <motion.button
                 onClick={handleSubmit}
@@ -416,36 +382,7 @@ export default function LandingPrompt() {
         </motion.div>
 
         {/* ── Features Capsules ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.55, duration: 0.55 }}
-          className="flex items-center gap-2 flex-wrap justify-center mt-14 px-4 z-10"
-        >
-          {CAPS.map((cap, i) => (
-            <React.Fragment key={cap}>
-              <span className="text-[12px] text-zinc-200 bg-blue-900/10 border border-blue-800/50 px-2 py-1 rounded-full">
-                {cap}
-              </span>
-              {i < CAPS.length - 1 && (
-                <span
-                  className="w-[3px] h-[3px] rounded-full"
-                  style={{ background: "rgba(255,255,255,0.12)" }}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </motion.div>
-
-        {/* ── Footer ── */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-14 mb-8 text-[11px] z-10 text-stone-400"
-        >
-          GEN UI — AI Frontend Builder
-        </motion.p>
+        <FeaturesCapsules />
       </div>
     </>
   );

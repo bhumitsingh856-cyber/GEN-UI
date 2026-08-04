@@ -1,175 +1,200 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/GEN-UI-22d3ee?style=for-the-badge&labelColor=030305&color=22d3ee" alt="GEN UI" />
 
 # GEN UI
 
-**Prompt → Full React App in seconds.**
+**Describe a UI → Generate a React app → Edit and preview it instantly.**
 
-AI‑powered frontend generator that turns a text description into a complete, production‑ready React application — with live preview and one‑click deploy.
-
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org)
-[![React](https://img.shields.io/badge/React-18-61dafb?style=flat-square&logo=react)](https://react.dev)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38bdf8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+GEN UI is an AI-powered frontend builder that turns a natural-language prompt into a working React UI with live preview, file-based editing, project saving, and authentication-aware project history.
 
 </div>
 
 ---
 
-## ✨ What is GEN UI?
+## What GEN UI Does
 
-GEN UI is an open‑source AI frontend builder.  
-Simply describe what you need — a landing page, dashboard, portfolio, etc. — and GEN UI generates a fully functional React app with real components, animations, and styles. No templates, no drag‑and‑drop. Just code.
+GEN UI helps you go from idea to working UI in minutes.
 
-```txt
-"Create a dark SaaS landing page for an AI startup with pricing and testimonials"
-        ↓
-Full React app — Navbar, Hero, Features, Stats, Testimonials, CTA, Footer
-        ↓
-Live preview in browser + one‑click open in CodeSandbox
-```
+**Example Prompt:**
+"Create a modern dark landing page for an AI SaaS product with a hero section, pricing, testimonials, and a footer."
 
----
-
-## 🎬 Demo
-
-> Write your prompt → watch code stream file by file → preview renders live → deploy instantly
+**What You Get:**
+- Complete React project structure
+- Live preview inside the editor
+- File explorer with code editing
+- AI chat assistant for refinements
+- One-click export and deployment
 
 ---
 
-## 🚀 Features
+## Core Features
 
-- **AI Code Generation** – Fireworks AI creates complete React apps at 400 tokens/sec (up to 32k tokens).  
-- **Instant Preview** – Sandpack renders the app in‑browser with zero setup.  
-- **File Explorer** – Full component tree with syntax‑highlighted viewer.  
-- **Live Link** – Open a shareable URL in CodeSandbox instantly.  
-- **Export as ZIP** – Download the project and run locally.  
-- **Split View** – Side‑by‑side code editor and live preview.  
+| Feature | Description |
+|---------|-------------|
+| AI UI Generation | Generate React apps from text prompts |
+| Live Preview | See changes instantly with Sandpack |
+| File Explorer | Browse and edit generated files |
+| Chat Assistant | Edit files via natural language |
+| Magic Fix | Send runtime errors to AI for fixing |
+| Live Link | Publish to CodeSandbox instantly |
+| Export ZIP | Download the generated project |
+| Project Saving | Save projects to MongoDB (signed-in users) |
+| Project History | Load previously saved projects |
+| Clerk Auth | Secure user authentication |
+
 
 ---
 
-## 🛠 Tech Stack
+## 🧩 How the app works
 
-| Layer                | Technology                         |
-|----------------------|------------------------------------|
-| Framework            | Next.js 15 (App Router)            |
-| AI Model             | Deepseek‑v4‑flash via Fireworks AI |
-| In‑browser Preview   | Sandpack (`@codesandbox/sandpack-react`) |
-| Animations           | Framer Motion                      |
-| Styling              | Tailwind CSS                       |
-| State Management     | Zustand                            |
-| Deploy               | CodeSandbox Define API             |
-| Icons                | Lucide React                       |
+1. The user enters a prompt on the landing page.
+2. The prompt is enhanced and sent to the generation backend.
+3. The generated file structure is stored in Zustand.
+4. If the user is signed in, the project is saved to MongoDB and linked to the user.
+5. The user is redirected to the editor to preview and refine the UI.
+6. The editor can load a previously saved project from the project store and save updates back to the database.
+
+---
+
+## 🛠 Tech stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19 |
+| Styling | Tailwind CSS |
+| State | Zustand |
+| Editor/Preview | Sandpack |
+| Animations | Framer Motion |
+| Auth | Clerk |
+| Database | MongoDB + Mongoose |
+| AI generation | LangChain + LLM providers |
+| Icons | Lucide React |
+
+---
+
+## AI Models
+
+| Task | Model |
+|------|-------|
+| Prompt Enhancer | openai/gpt-oss-20b |
+| Code Generation | deepseek-v4-flash |
+| Code Update | llama-3.3-70b-versatile |
+| Magic Fix | llama-3.3-70b-versatile |
 
 ---
 
 ## 📦 Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/gen-ui.git
+git clone <your-repo-url>
 cd gen-ui
-
-# Install dependencies
 npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local and add your API keys
 ```
 
-### Environment Variables
+### Environment variables
+
+Create a `.env.local` file with the required values:
 
 ```bash
-# .env.local
-FIREWORKS_API_KEY=your_key_here
-GROQ_API=your_key_here
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+MONGODB_URI=your_mongodb_connection_string
+
+# AI provider keys depending on your setup
+GROQ_API=your_groq_key
+OPENAI_API_KEY=your_openai_key
+FIREWORKS_API_KEY=your_fireworks_key
 ```
 
-### Run Locally
+### Run locally
 
 ```bash
 npm run dev
 ```
 
-Open <http://localhost:3000> and start generating.
+Then open:
+
+```txt
+http://localhost:3000
+```
 
 ---
 
-## ⚙️ How It Works
+## 🗂 Project structure
 
-
-1. **Prompt** → POST `/api/genui` → AI returns a JSON map of files.  
-2. **Success** → JSON → Zustand store → navigation to the editor.  
-3. **Editor** → renders file tree, code editor, and live preview.  
-4. **Live Link** → deploys to CodeSandbox, giving a shareable URL.
-
----
-
-## 🎨 System Prompt
-
-GEN UI uses a carefully engineered system prompt that instructs the model to:
-
-- Return a single valid JSON object (no markdown, no preamble).  
-- Generate complete, working React components with real content.  
-- Apply a dark glassmorphism design using Framer Motion animations.  
-- Follow strict file structure: `index.js`, `App.js`, `src/components/*.js`.  
-- Inject Tailwind via CDN in `index.js` (no build tools needed).  
-- Use only valid Lucide icon names.
-
-See [`services/SystemPrompt.js`](services/SystemPrompt.js) for the full prompt.
+```txt
+src/
+  app/                # Next.js app routes
+  components/         # UI components such as navbar, chat panel, export
+  actions/            # Server actions for saving/loading projects
+  services/           # AI generation, prompt enhancement, LLM wiring
+  models/             # Mongoose models
+  store/              # Zustand store
+```
 
 ---
 
-## 🤝 Contributing
+## 🧠 AI generation flow
 
-Contributions are welcome! To get started:
+GEN UI uses a prompt pipeline that:
 
-1. Fork the repo.  
-2. Create a feature branch (`git checkout -b feature/awesome-feature`).  
-3. Open a pull request with a clear description of your changes.
-
----
-
-## 📋 Roadmap
-
-- [ ] Multiple AI model support (GPT‑4o, Claude, Gemini)  
-- [ ] Edit and regenerate individual components  
-- [ ] Project history & saved generations  
-- [ ] Custom design system / theme input  
-- [ ] Direct GitHub push integration  
-- [ ] Multi‑page app generation  
-- [ ] Image upload → UI generation from screenshots  
+- enhances the user prompt and creates proper structure for app,
+- sends it to the generation service,
+- parses the response into a file-based React project,
+- stores it in the current editor state,
+- optionally persists it to the database for signed-in users,
+- and allows the user to refine the result through the assistant or Magic Fix.
 
 ---
 
-## 🐛 Known Issues
+## 🧪 Development notes
 
-- Sandpack preview requires the **React** template; the Vite template triggers `esbuild-wasm` errors.  
-- Very long generations (30k+ tokens) may timeout on Vercet Hobby tier (`maxDuration: 60`).  
-- LLM may occasionally generate invalid Lucide icon names — they are sanitized client‑side.
+- The editor uses Sandpack for live rendering.
+- The current project files are stored in Zustand so the UI can be edited instantly.
+- Signed-in users can save their current project and reopen it from the Projects page.
+- The Projects page loads a project’s stored files into the editor state.
 
 ---
 
 ## 🤖 UI Assistant
 
-A built‑in AI assistant lets you edit any file directly from the editor.
-- **Live updates** – click **Save Changes** to sync the current file to the store.
-- **File mentions** – reference files with `@/path/to/file` in the chat to focus the assistant.
-- **Context‑aware suggestions** – the assistant uses the latest project state to generate accurate code.
+The built-in assistant lets you edit files directly from the editor.
 
-## ⚡ Prompt Enhancer
-
-The prompt enhancer refines your natural language prompts before they are sent to the LLM, ensuring higher quality code generation.
-- **Pre‑processing** – adds system‑prompt directives, sanitizes inputs, and formats multi‑step instructions.
-- **Dynamic token budgeting** – trims prompts to stay within model limits while preserving intent.
+Features:
+- mention files like `@/path/to/file` in chat
+- apply edits to the current generation state
+- save your current work back to the project store
 
 ---
 
-<div align="center">
+## 📤 Export and sharing
 
-Built with ☕ and way too many JSON parse errors.
+Users can export the generated UI as a ZIP archive and also use the live preview workflow to inspect the generated app.
 
-⭐ Star this repo if you find it useful
+---
 
-</div>
+## 🤝 Contributing
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Open a pull request
+
+---
+
+## 📝 Roadmap
+
+- better project version history
+- component-level regeneration
+- richer prompt templates
+- improved error handling for generation failures
+- more AI provider integrations
+
+---
+
+## ⭐ Notes
+
+GEN UI is designed for fast prototyping and iterative UI generation. It is a strong starting point for AI-assisted frontend development, especially for landing pages, dashboards, and rapid mockups.

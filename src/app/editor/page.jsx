@@ -17,10 +17,15 @@ import { AnimatePresence } from "framer-motion";
 function Page() {
   const { files } = useCodeStore();
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // The editor reads the active project files from Zustand.
+  // Project selection and generation both populate the store.
   return (
-    <div>
+    <div className="relative">
       <SandpackProvider theme="dark" template="react" files={files}>
+        <div className="sticky top-0 z-90">
         <Navbar onChatToggle={() => setIsChatOpen(!isChatOpen)} />
+        </div>
         <SandpackLayout>
           <CustomFileExplorer />
           <SandpackCodeEditor

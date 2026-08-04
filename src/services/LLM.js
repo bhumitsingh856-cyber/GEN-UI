@@ -18,7 +18,7 @@ const CodeGenerationLLM = new ChatFireworks({
 
 const CodeUpdateLLM = new ChatGroq({
   apiKey: process.env.GROQ_API,
-  model: "openai/gpt-oss-120b",
+  model: "llama-3.3-70b-versatile",
 });
 
 

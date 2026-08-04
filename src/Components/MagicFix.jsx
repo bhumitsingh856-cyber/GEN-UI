@@ -51,7 +51,7 @@ export const AIFixButton = () => {
     <button
       onClick={handleFix}
       disabled={fixing}
-      className="px-3 py-1 text-xs rounded-full 
+      className="px-3 py-0.5 text-xs rounded-full 
     bg-amber-500/20 text-amber-400 
     hover:bg-amber-500/30 
     border border-amber-500/30 hover:border-amber-500/50

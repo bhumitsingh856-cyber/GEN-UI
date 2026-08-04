@@ -256,7 +256,7 @@ export default function ChatPanel({ isOpen, onClose }) {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: "100%", opacity: 0 }}
       transition={{ type: "spring", stiffness: 350, damping: 30 }}
-      className="flex flex-col w-[380px] flex-shrink-0 h-screen bg-[#0a0a0f] border-l border-white/5 fixed top-0 right-0 z-[9999] overflow-hidden"
+      className="flex flex-col w-full md:w-[380px] flex-shrink-0 h-[100dvh] bg-[#0a0a0f] border-l border-white/5 fixed top-0 right-0 z-[9999] overflow-hidden"
     >
       {/* ── Header ── */}
       <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0 bg-white/5 backdrop-blur-sm">

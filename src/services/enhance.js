@@ -6,7 +6,7 @@ export async function enhance(prompt) {
   try {
     const prompt2 = await promptEnhancer.invoke([
       new SystemMessage(enhancedPrompt),
-      new HumanMessage(prompt),
+      new HumanMessage(promp),
     ]);
     if (!prompt2.content) {
       return prompt;
